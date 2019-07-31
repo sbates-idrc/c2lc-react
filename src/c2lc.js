@@ -93,6 +93,28 @@ class ProgramTextEditor extends React.Component {
     }
 }
 
+class EditorsSelect extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(e) {
+        this.props.onChange(parseInt(e.target.value, 10));
+    }
+
+    render() {
+        return (
+            <select value={this.props.numEditors} onChange={this.handleChange}>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        );
+    }
+}
+
 class RunButton extends React.Component {
     render() {
         return (
@@ -107,7 +129,8 @@ class App extends React.Component {
 
         this.state = {
             program: ["forward", "left", "right", "forward"],
-            programVer: 1
+            programVer: 1,
+            numEditors: 1
         };
 
         this.interpreter = new Interpreter(
@@ -121,6 +144,7 @@ class App extends React.Component {
         this.syntax = new TextSyntax();
 
         this.handleProgramChange = this.handleProgramChange.bind(this);
+        this.handleNumEditorsChange = this.handleNumEditorsChange.bind(this);
         this.handleClickRun = this.handleClickRun.bind(this);
     }
 
@@ -133,6 +157,12 @@ class App extends React.Component {
         });
     }
 
+    handleNumEditorsChange(numEditors) {
+        this.setState({
+            numEditors: numEditors
+        });
+    }
+
     handleClickRun() {
         this.interpreter.run(this.state.program);
     }
@@ -140,16 +170,17 @@ class App extends React.Component {
     render() {
         return (
             <div>
-                <ProgramTextEditor
-                    program={ this.state.program }
-                    programVer={ this.state.programVer }
-                    syntax={ this.syntax }
-                    onChange={ this.handleProgramChange } />
-                <ProgramTextEditor
-                    program={ this.state.program }
-                    programVer={ this.state.programVer }
-                    syntax={ this.syntax }
-                    onChange={ this.handleProgramChange } />
+                {[...Array(this.state.numEditors)].map((x, i) => {
+                    return <ProgramTextEditor
+                        program={ this.state.program }
+                        programVer={ this.state.programVer }
+                        syntax={ this.syntax }
+                        onChange={ this.handleProgramChange }
+                        key={ i } />
+                })}
+                <EditorsSelect
+                    numEditors={ this.state.numEditors }
+                    onChange={ this.handleNumEditorsChange } />
                 <RunButton onClick={ this.handleClickRun } />
             </div>
         );
