@@ -79,11 +79,11 @@ class ProgramTextEditor extends React.Component<ProgramTextEditorProps, ProgramT
         }
     }
 
-    handleChange: (SyntheticEvent<>) => void;
-    handleChange(e) {
+    handleChange: (SyntheticEvent<HTMLTextAreaElement>) => void;
+    handleChange(e: SyntheticEvent<HTMLTextAreaElement>) {
         // Update the local program text state
         this.setState({
-            text: e.target.value
+            text: e.currentTarget.value
         });
     }
 
@@ -120,9 +120,9 @@ class EditorsSelect extends React.Component<EditorsSelectProps> {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    handleChange: (SyntheticEvent<>) => void;
-    handleChange(e) {
-        this.props.onChange(parseInt(e.target.value, 10));
+    handleChange: (SyntheticEvent<HTMLSelectElement>) => void;
+    handleChange(e: SyntheticEvent<HTMLSelectElement>) {
+        this.props.onChange(parseInt(e.currentTarget.value, 10));
     }
 
     render() {
