@@ -1,21 +1,23 @@
+// @flow
+
 import React from 'react';
 
-class ActionHandler {
-    constructor(handler) {
-        this.handleAction = handler;
-    }
-}
+type ActionHandler = {
+    (Interpreter): void
+};
 
 class Interpreter {
-    constructor(actions) {
+    actions: { [string]: ActionHandler };
+
+    constructor(actions: { [string]: ActionHandler }) {
         this.actions = actions;
     }
 
-    run(program) {
+    run(program: Array<string>): void {
         for (const action of program) {
             const handler = this.actions[action];
             if (handler) {
-                handler.handleAction(this);
+                handler(this);
             } else {
                 console.log("UNKNOWN ACTION");
             }
@@ -24,19 +26,31 @@ class Interpreter {
 }
 
 class TextSyntax {
-    read(text) {
+    read(text: string): Array<string> {
         if (text.trim().length === 0) {
             return [];
         }
         return text.trim().split(/\s+/);
     }
 
-    print(program) {
+    print(program: Array<string>): string {
         return program.join(" ");
     }
 }
 
-class ProgramTextEditor extends React.Component {
+type ProgramTextEditorProps = {
+    program: Array<string>,
+    programVer: number,
+    syntax: TextSyntax,
+    onChange: (Array<string>) => void
+};
+
+type ProgramTextEditorState = {
+    programVer: number,
+    text: string
+};
+
+class ProgramTextEditor extends React.Component<ProgramTextEditorProps, ProgramTextEditorState> {
     // This is a 'uncontrolled component' that maintains its own local version
     // of the program text. The changes are sent outwards (to the
     // props.onChange handler) at blur. And getDerivedStateFromProps() is used
@@ -44,7 +58,7 @@ class ProgramTextEditor extends React.Component {
     // its state to reflect changes from outside.
     // See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
 
-    constructor(props) {
+    constructor(props: ProgramTextEditorProps) {
         super(props);
         this.state = {
             programVer: props.programVer,
@@ -65,6 +79,7 @@ class ProgramTextEditor extends React.Component {
         }
     }
 
+    handleChange: (SyntheticEvent<>) => void;
     handleChange(e) {
         // Update the local program text state
         this.setState({
@@ -72,6 +87,7 @@ class ProgramTextEditor extends React.Component {
         });
     }
 
+    handleBlur: () => void;
     handleBlur() {
         // Call the props.onChange handler at blur.
         // We could implement a much more sophisticated strategy here, such as
@@ -93,12 +109,18 @@ class ProgramTextEditor extends React.Component {
     }
 }
 
-class EditorsSelect extends React.Component {
-    constructor(props) {
+type EditorsSelectProps = {
+    numEditors: number,
+    onChange: (number) => void
+};
+
+class EditorsSelect extends React.Component<EditorsSelectProps> {
+    constructor(props: EditorsSelectProps) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
     }
 
+    handleChange: (SyntheticEvent<>) => void;
     handleChange(e) {
         this.props.onChange(parseInt(e.target.value, 10));
     }
@@ -115,7 +137,7 @@ class EditorsSelect extends React.Component {
     }
 }
 
-class RunButton extends React.Component {
+class RunButton extends React.Component<{onClick: () => void}> {
     render() {
         return (
             <button onClick={this.props.onClick}>Run</button>
@@ -123,8 +145,17 @@ class RunButton extends React.Component {
     }
 }
 
-class App extends React.Component {
-    constructor(props) {
+type AppState = {
+    program: Array<string>,
+    programVer: number,
+    numEditors: number
+};
+
+class App extends React.Component<{}, AppState> {
+    interpreter: Interpreter;
+    syntax: TextSyntax;
+
+    constructor(props: {}) {
         super(props);
 
         this.state = {
@@ -135,9 +166,9 @@ class App extends React.Component {
 
         this.interpreter = new Interpreter(
             {
-                forward: new ActionHandler(() => { console.log("FORWARD") }),
-                left: new ActionHandler(() => { console.log("LEFT") }),
-                right: new ActionHandler(() => { console.log("RIGHT") })
+                forward: () => { console.log("FORWARD") },
+                left: () => { console.log("LEFT") },
+                right: () => { console.log("RIGHT") }
             }
         );
 
@@ -148,7 +179,8 @@ class App extends React.Component {
         this.handleClickRun = this.handleClickRun.bind(this);
     }
 
-    handleProgramChange(program) {
+    handleProgramChange: (Array<string>) => void;
+    handleProgramChange(program: Array<string>) {
         this.setState((state) => {
             return {
                 program: program,
@@ -157,12 +189,14 @@ class App extends React.Component {
         });
     }
 
-    handleNumEditorsChange(numEditors) {
+    handleNumEditorsChange: (number) => void;
+    handleNumEditorsChange(numEditors: number) {
         this.setState({
             numEditors: numEditors
         });
     }
 
+    handleClickRun: () => void;
     handleClickRun() {
         this.interpreter.run(this.state.program);
     }
