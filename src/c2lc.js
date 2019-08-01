@@ -243,7 +243,7 @@ class App extends React.Component<{}, AppState> {
         super(props);
 
         this.state = {
-            program: ["forward", "left", "right", "forward"],
+            program: ["forward", "left"],
             programVer: 1,
             numEditors: 1
         };
