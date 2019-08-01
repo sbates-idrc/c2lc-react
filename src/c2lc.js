@@ -215,6 +215,22 @@ class TurtleGraphics extends React.Component<{}, TurtleGraphicsState> {
         });
     }
 
+    home(): void {
+        this.setState({
+            location: {
+                x: 0,
+                y: 0
+            },
+            directionDegrees: 0
+        });
+    }
+
+    clear(): void {
+        this.setState({
+            path: []
+        });
+    }
+
     render() {
         const turtleTransform = `translate(${this.state.location.x} ${this.state.location.y}) rotate(${this.state.directionDegrees} 0 0)`;
 
@@ -242,14 +258,6 @@ class TurtleGraphics extends React.Component<{}, TurtleGraphicsState> {
                     </svg>
                 </span>
             </div>
-        );
-    }
-}
-
-class RunButton extends React.Component<{onClick: () => void}> {
-    render() {
-        return (
-            <button onClick={this.props.onClick}>Run</button>
         );
     }
 }
@@ -301,6 +309,8 @@ class App extends React.Component<{}, AppState> {
         this.handleProgramChange = this.handleProgramChange.bind(this);
         this.handleNumEditorsChange = this.handleNumEditorsChange.bind(this);
         this.handleClickRun = this.handleClickRun.bind(this);
+        this.handleClickHome = this.handleClickHome.bind(this);
+        this.handleClickClear = this.handleClickClear.bind(this);
     }
 
     handleProgramChange: (Array<string>) => void;
@@ -325,6 +335,20 @@ class App extends React.Component<{}, AppState> {
         this.interpreter.run(this.state.program);
     }
 
+    handleClickHome: () => void;
+    handleClickHome() {
+        if (this.turtleGraphicsRef.current !== null) {
+            this.turtleGraphicsRef.current.home();
+        }
+    }
+
+    handleClickClear: () => void;
+    handleClickClear() {
+        if (this.turtleGraphicsRef.current !== null) {
+            this.turtleGraphicsRef.current.clear();
+        }
+    }
+
     render() {
         return (
             <div>
@@ -342,7 +366,9 @@ class App extends React.Component<{}, AppState> {
                 <div className='c2lc-graphics'>
                     <TurtleGraphics ref={this.turtleGraphicsRef} />
                 </div>
-                <RunButton onClick={ this.handleClickRun } />
+                <button onClick={ this.handleClickRun }>Run</button>
+                <button onClick={ this.handleClickHome }>Home</button>
+                <button onClick={ this.handleClickClear }>Clear</button>
             </div>
         );
     }
