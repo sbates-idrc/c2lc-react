@@ -2,7 +2,11 @@
 
 import React from 'react';
 
-function c2lcMathWrap (start: number, stop: number, val: number): number {
+function c2lcMathDegrees2radians(degrees: number): number {
+    return degrees * Math.PI / 180;
+}
+
+function c2lcMathWrap(start: number, stop: number, val: number): number {
     return val - (Math.floor((val - start) / (stop - start)) * (stop - start));
 }
 
@@ -142,6 +146,10 @@ class EditorsSelect extends React.Component<EditorsSelectProps> {
 }
 
 type TurtleGraphicsState = {
+    location: {
+        x: number,
+        y: number
+    },
     directionDegrees: number
 };
 
@@ -149,8 +157,26 @@ class TurtleGraphics extends React.Component<{}, TurtleGraphicsState> {
     constructor(props: {}) {
         super(props);
         this.state = {
+            location: {
+                x: 0,
+                y: 0
+            },
             directionDegrees: 0
         }
+    }
+
+    forward(distance: number): void {
+        this.setState((state) => {
+            const directionRadians = c2lcMathDegrees2radians(state.directionDegrees);
+            const xOffset = Math.sin(directionRadians) * distance;
+            const yOffset = Math.cos(directionRadians) * distance;
+            return {
+                location: {
+                    x: state.location.x + xOffset,
+                    y: state.location.y - yOffset
+                }
+            }
+        });
     }
 
     rotateLeft(amountDegrees: number): void {
@@ -172,7 +198,7 @@ class TurtleGraphics extends React.Component<{}, TurtleGraphicsState> {
     }
 
     render() {
-        const turtleTransform = `rotate(${this.state.directionDegrees} 0 0)`;
+        const turtleTransform = `translate(${this.state.location.x} ${this.state.location.y}) rotate(${this.state.directionDegrees} 0 0)`;
 
         return (
             <div>
@@ -225,7 +251,9 @@ class App extends React.Component<{}, AppState> {
         this.interpreter = new Interpreter(
             {
                 forward: () => {
-                    console.log("FORWARD")
+                    if (this.turtleGraphicsRef.current !== null) {
+                        this.turtleGraphicsRef.current.forward(40);
+                    }
                 },
                 left: () => {
                     if (this.turtleGraphicsRef.current !== null) {
