@@ -2,6 +2,10 @@
 
 import React from 'react';
 
+function c2lcMathWrap (start: number, stop: number, val: number): number {
+    return val - (Math.floor((val - start) / (stop - start)) * (stop - start));
+}
+
 type ActionHandler = {
     (Interpreter): void
 };
@@ -137,6 +141,59 @@ class EditorsSelect extends React.Component<EditorsSelectProps> {
     }
 }
 
+type TurtleGraphicsState = {
+    directionDegrees: number
+};
+
+class TurtleGraphics extends React.Component<{}, TurtleGraphicsState> {
+    constructor(props: {}) {
+        super(props);
+        this.state = {
+            directionDegrees: 0
+        }
+    }
+
+    rotateLeft(amountDegrees: number): void {
+        this.setState((state) => {
+            return {
+                directionDegrees: c2lcMathWrap(0, 360,
+                    state.directionDegrees - amountDegrees)
+            };
+        });
+    }
+
+    rotateRight(amountDegrees: number): void {
+        this.setState((state) => {
+            return {
+                directionDegrees: c2lcMathWrap(0, 360,
+                    state.directionDegrees + amountDegrees)
+            };
+        });
+    }
+
+    render() {
+        const turtleTransform = `rotate(${this.state.directionDegrees} 0 0)`;
+
+        return (
+            <div>
+                <span
+                    role='img'
+                    className='c2lc-turtleGraphics-drawingArea'
+                    aria-label='Drawing area'>
+                    <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        viewBox='-100 -100 200 200'>
+                        <polygon
+                            className='c2lc-turtleGraphics-turtle'
+                            transform={turtleTransform}
+                            points='-6 4 6 4 0 -9'/>
+                    </svg>
+                </span>
+            </div>
+        );
+    }
+}
+
 class RunButton extends React.Component<{onClick: () => void}> {
     render() {
         return (
@@ -154,6 +211,7 @@ type AppState = {
 class App extends React.Component<{}, AppState> {
     interpreter: Interpreter;
     syntax: TextSyntax;
+    turtleGraphicsRef: { current: null | TurtleGraphics };
 
     constructor(props: {}) {
         super(props);
@@ -166,13 +224,25 @@ class App extends React.Component<{}, AppState> {
 
         this.interpreter = new Interpreter(
             {
-                forward: () => { console.log("FORWARD") },
-                left: () => { console.log("LEFT") },
-                right: () => { console.log("RIGHT") }
+                forward: () => {
+                    console.log("FORWARD")
+                },
+                left: () => {
+                    if (this.turtleGraphicsRef.current !== null) {
+                        this.turtleGraphicsRef.current.rotateLeft(90);
+                    }
+                },
+                right: () => {
+                    if (this.turtleGraphicsRef.current !== null) {
+                        this.turtleGraphicsRef.current.rotateRight(90);
+                    }
+                }
             }
         );
 
         this.syntax = new TextSyntax();
+
+        this.turtleGraphicsRef = React.createRef<TurtleGraphics>();
 
         this.handleProgramChange = this.handleProgramChange.bind(this);
         this.handleNumEditorsChange = this.handleNumEditorsChange.bind(this);
@@ -215,6 +285,9 @@ class App extends React.Component<{}, AppState> {
                 <EditorsSelect
                     numEditors={ this.state.numEditors }
                     onChange={ this.handleNumEditorsChange } />
+                <div className='c2lc-graphics'>
+                    <TurtleGraphics ref={this.turtleGraphicsRef} />
+                </div>
                 <RunButton onClick={ this.handleClickRun } />
             </div>
         );
