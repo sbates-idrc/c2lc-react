@@ -2,6 +2,7 @@
 
 import React from 'react';
 import EditorsSelect from './EditorsSelect';
+import * as FeatureDetection from './FeatureDetection';
 import Interpreter from './Interpreter';
 import ProgramTextEditor from './ProgramTextEditor';
 import TextSyntax from './TextSyntax';
@@ -13,7 +14,12 @@ type AppState = {
     numEditors: number
 };
 
+type AppContext = {
+    bluetoothApiIsAvailable: boolean
+};
+
 export default class App extends React.Component<{}, AppState> {
+    appContext: AppContext;
     interpreter: Interpreter;
     syntax: TextSyntax;
     turtleGraphicsRef: { current: null | TurtleGraphics };
@@ -25,6 +31,10 @@ export default class App extends React.Component<{}, AppState> {
             program: ["forward", "left"],
             programVer: 1,
             numEditors: 1
+        };
+
+        this.appContext = {
+            bluetoothApiIsAvailable: FeatureDetection.bluetoothApiIsAvailable()
         };
 
         this.interpreter = new Interpreter(
@@ -114,6 +124,13 @@ export default class App extends React.Component<{}, AppState> {
                 <button onClick={ this.handleClickRun }>Run</button>
                 <button onClick={ this.handleClickHome }>Home</button>
                 <button onClick={ this.handleClickClear }>Clear</button>
+                <div>
+                    {this.appContext.bluetoothApiIsAvailable ? (
+                        <p>Bluetooth available</p>
+                    ) : (
+                        <p>Bluetooth not available</p>
+                    )}
+                </div>
             </div>
         );
     }
