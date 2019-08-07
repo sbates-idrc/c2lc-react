@@ -2,6 +2,7 @@
 
 import React from 'react';
 import TextSyntax from './TextSyntax';
+import * as Utils from './Utils';
 
 type ProgramTextEditorProps = {
     program: Array<string>,
@@ -23,8 +24,11 @@ export default class ProgramTextEditor extends React.Component<ProgramTextEditor
     // its state to reflect changes from outside.
     // See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
 
+    textareaId: string;
+
     constructor(props: ProgramTextEditorProps) {
         super(props);
+        this.textareaId = Utils.generateId('texteditor');
         this.state = {
             programVer: props.programVer,
             text: props.syntax.print(props.program)
@@ -65,7 +69,9 @@ export default class ProgramTextEditor extends React.Component<ProgramTextEditor
     render() {
         return (
             <div>
+                <label htmlFor={this.textareaId}>Program:</label>
                 <textarea
+                    id={this.textareaId}
                     value={this.state.text}
                     onChange={this.handleChange}
                     onBlur={this.handleBlur} />
