@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">C2lcReactCapacitor</string>
+    <string name="title_activity_main">C2lcReactCapacitor</string>
+    <string name="package_name">org.codelearncreate.c2lcreactcapacitor</string>
+    <string name="fileprovider_authority">org.codelearncreate.c2lcreactcapacitor.fileprovider</string>
+    <string name="custom_url_scheme">org.codelearncreate.c2lcreactcapacitor</string>
+</resources>

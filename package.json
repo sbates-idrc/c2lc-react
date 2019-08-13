@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@capacitor/android": "1.1.1",
+    "@capacitor/cli": "1.1.1",
+    "@capacitor/core": "1.1.1",
+    "@capacitor/ios": "1.1.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-scripts": "3.0.1"

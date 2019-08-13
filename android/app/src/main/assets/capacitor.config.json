@@ -1,0 +1,7 @@
+{
+  "appId": "org.codelearncreate.c2lcreactcapacitor",
+  "appName": "C2lcReactCapacitor",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build"
+}
