@@ -7,6 +7,7 @@ import Interpreter from './Interpreter';
 import ProgramTextEditor from './ProgramTextEditor';
 import TextSyntax from './TextSyntax';
 import TurtleGraphics from './TurtleGraphics';
+import Mic from './Mic';
 
 type AppState = {
     program: Array<string>,
@@ -66,6 +67,9 @@ export default class App extends React.Component<{}, AppState> {
         this.handleClickRun = this.handleClickRun.bind(this);
         this.handleClickHome = this.handleClickHome.bind(this);
         this.handleClickClear = this.handleClickClear.bind(this);
+        this.handleDeviceInput = this.handleDeviceInput.bind(this);
+        this.voiceCancle = this.voiceCancle.bind(this);
+        this.voiceDeleteAll = this.voiceDeleteAll.bind(this);
     }
 
     handleProgramChange: (Array<string>) => void;
@@ -104,6 +108,33 @@ export default class App extends React.Component<{}, AppState> {
         }
     }
 
+    //External input related function
+
+    handleDeviceInput = voice => {
+        let updatedProgram = this.state.program;
+        updatedProgram.push(voice);
+        this.setState({
+            program: updatedProgram
+        });
+        this.handleProgramChange(updatedProgram);
+    };
+
+    voiceCancle() {
+        let updatedProgram = this.state.program;
+        updatedProgram.pop();
+        this.setState({
+            program: updatedProgram
+        });
+        this.handleProgramChange(updatedProgram);
+    }
+
+    voiceDeleteAll() {
+        this.setState({
+            program: []
+        })
+        this.handleProgramChange(this.state.program);
+    }
+
     render() {
         return (
             <div>
@@ -131,6 +162,14 @@ export default class App extends React.Component<{}, AppState> {
                         <p>Bluetooth not available</p>
                     )}
                 </div>
+                <Mic 
+                    voiceInput={ this.handleDeviceInput }
+                    run = { this.handleClickRun } 
+                    cancle = { this.voiceCancle }
+                    home = { this.handleClickHome }
+                    clear = { this.handleClickClear }
+                    deleteAll = { this.voiceDeleteAll }
+                />
             </div>
         );
     }
