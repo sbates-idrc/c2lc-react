@@ -7,6 +7,7 @@ import Interpreter from './Interpreter';
 import ProgramTextEditor from './ProgramTextEditor';
 import TextSyntax from './TextSyntax';
 import TurtleGraphics from './TurtleGraphics';
+import Mic from './Mic';
 
 type AppState = {
     program: Array<string>,
@@ -15,7 +16,8 @@ type AppState = {
 };
 
 type AppContext = {
-    bluetoothApiIsAvailable: boolean
+    bluetoothApiIsAvailable: boolean,
+    speechRecognitionIsAvailable: boolean
 };
 
 export default class App extends React.Component<{}, AppState> {
@@ -34,7 +36,8 @@ export default class App extends React.Component<{}, AppState> {
         };
 
         this.appContext = {
-            bluetoothApiIsAvailable: FeatureDetection.bluetoothApiIsAvailable()
+            bluetoothApiIsAvailable: FeatureDetection.bluetoothApiIsAvailable(),
+            speechRecognitionIsAvailable: FeatureDetection.speechRecognitionIsAvailable()
         };
 
         this.interpreter = new Interpreter(
@@ -66,6 +69,9 @@ export default class App extends React.Component<{}, AppState> {
         this.handleClickRun = this.handleClickRun.bind(this);
         this.handleClickHome = this.handleClickHome.bind(this);
         this.handleClickClear = this.handleClickClear.bind(this);
+        this.appendToProgram = this.appendToProgram.bind(this);
+        this.removeLastActionFromProgram = this.removeLastActionFromProgram.bind(this);
+        this.voiceDeleteAll = this.voiceDeleteAll.bind(this);
     }
 
     handleProgramChange: (Array<string>) => void;
@@ -73,6 +79,26 @@ export default class App extends React.Component<{}, AppState> {
         this.setState((state) => {
             return {
                 program: program,
+                programVer: state.programVer + 1
+            }
+        });
+    }
+
+    appendToProgram: (string) => void;
+    appendToProgram(newAction: string) {
+        this.setState((state) => {
+            return {
+                program: state.program.concat([newAction]),
+                programVer: state.programVer + 1
+            }
+        });
+    }
+
+    removeLastActionFromProgram: () => void;
+    removeLastActionFromProgram() {
+        this.setState((state) => {
+            return {
+                program: state.program.slice(0, state.program.length - 1),
                 programVer: state.programVer + 1
             }
         });
@@ -104,6 +130,11 @@ export default class App extends React.Component<{}, AppState> {
         }
     }
 
+    voiceDeleteAll: () => void;
+    voiceDeleteAll() {
+        this.handleProgramChange([]);
+    }
+
     render() {
         return (
             <div>
@@ -130,6 +161,17 @@ export default class App extends React.Component<{}, AppState> {
                     ) : (
                         <p>Bluetooth not available</p>
                     )}
+                </div>
+                <div>
+                    {this.appContext.speechRecognitionIsAvailable &&
+                        <Mic
+                            voiceInput = { this.appendToProgram }
+                            run = { this.handleClickRun }
+                            cancel = { this.removeLastActionFromProgram }
+                            home = { this.handleClickHome }
+                            clear = { this.handleClickClear }
+                            deleteAll = { this.voiceDeleteAll }
+                        />}
                 </div>
             </div>
         );
