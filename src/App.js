@@ -16,7 +16,8 @@ type AppState = {
 };
 
 type AppContext = {
-    bluetoothApiIsAvailable: boolean
+    bluetoothApiIsAvailable: boolean,
+    speechRecognitionIsAvailable: boolean
 };
 
 export default class App extends React.Component<{}, AppState> {
@@ -35,7 +36,8 @@ export default class App extends React.Component<{}, AppState> {
         };
 
         this.appContext = {
-            bluetoothApiIsAvailable: FeatureDetection.bluetoothApiIsAvailable()
+            bluetoothApiIsAvailable: FeatureDetection.bluetoothApiIsAvailable(),
+            speechRecognitionIsAvailable: FeatureDetection.speechRecognitionIsAvailable()
         };
 
         this.interpreter = new Interpreter(
@@ -67,8 +69,8 @@ export default class App extends React.Component<{}, AppState> {
         this.handleClickRun = this.handleClickRun.bind(this);
         this.handleClickHome = this.handleClickHome.bind(this);
         this.handleClickClear = this.handleClickClear.bind(this);
-        this.handleDeviceInput = this.handleDeviceInput.bind(this);
-        this.voiceCancle = this.voiceCancle.bind(this);
+        this.appendToProgram = this.appendToProgram.bind(this);
+        this.removeLastActionFromProgram = this.removeLastActionFromProgram.bind(this);
         this.voiceDeleteAll = this.voiceDeleteAll.bind(this);
     }
 
@@ -77,6 +79,26 @@ export default class App extends React.Component<{}, AppState> {
         this.setState((state) => {
             return {
                 program: program,
+                programVer: state.programVer + 1
+            }
+        });
+    }
+
+    appendToProgram: (string) => void;
+    appendToProgram(newAction: string) {
+        this.setState((state) => {
+            return {
+                program: state.program.concat([newAction]),
+                programVer: state.programVer + 1
+            }
+        });
+    }
+
+    removeLastActionFromProgram: () => void;
+    removeLastActionFromProgram() {
+        this.setState((state) => {
+            return {
+                program: state.program.slice(0, state.program.length - 1),
                 programVer: state.programVer + 1
             }
         });
@@ -108,31 +130,9 @@ export default class App extends React.Component<{}, AppState> {
         }
     }
 
-    //External input related function
-
-    handleDeviceInput = voice => {
-        let updatedProgram = this.state.program;
-        updatedProgram.push(voice);
-        this.setState({
-            program: updatedProgram
-        });
-        this.handleProgramChange(updatedProgram);
-    };
-
-    voiceCancle() {
-        let updatedProgram = this.state.program;
-        updatedProgram.pop();
-        this.setState({
-            program: updatedProgram
-        });
-        this.handleProgramChange(updatedProgram);
-    }
-
+    voiceDeleteAll: () => void;
     voiceDeleteAll() {
-        this.setState({
-            program: []
-        })
-        this.handleProgramChange(this.state.program);
+        this.handleProgramChange([]);
     }
 
     render() {
@@ -162,14 +162,17 @@ export default class App extends React.Component<{}, AppState> {
                         <p>Bluetooth not available</p>
                     )}
                 </div>
-                <Mic 
-                    voiceInput={ this.handleDeviceInput }
-                    run = { this.handleClickRun } 
-                    cancle = { this.voiceCancle }
-                    home = { this.handleClickHome }
-                    clear = { this.handleClickClear }
-                    deleteAll = { this.voiceDeleteAll }
-                />
+                <div>
+                    {this.appContext.speechRecognitionIsAvailable &&
+                        <Mic
+                            voiceInput = { this.appendToProgram }
+                            run = { this.handleClickRun }
+                            cancel = { this.removeLastActionFromProgram }
+                            home = { this.handleClickHome }
+                            clear = { this.handleClickClear }
+                            deleteAll = { this.voiceDeleteAll }
+                        />}
+                </div>
             </div>
         );
     }
